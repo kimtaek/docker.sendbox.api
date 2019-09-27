@@ -22,11 +22,18 @@ RUN apt -y install software-properties-common
 RUN add-apt-repository ppa:ondrej/php \
     && add-apt-repository ppa:ondrej/nginx
 
-# Install Nginx and some useful Tools
+# Install Mariadb
+RUN echo "mysql-server mysql-server/root_password password root" | debconf-set-selections \
+    && echo "mysql-server mysql-server/root_password_again password root" | debconf-set-selections \
+    && apt -y install mariadb-server
+
+# Install Redis, Nginx, Supervisor and some useful Tools
 RUN apt install -y \
     nginx \
     supervisor \
     dialog \
+    redis-server \
+    git \
     cron \
     curl \
     vim
@@ -47,6 +54,7 @@ RUN rm -Rf /etc/php/* && apt install -y \
     php7.2-gd \
     php7.2-curl \
     php7.2-mysql \
+    php7.2-xdebug \
     php7.2-imap \
     php7.2-mcrypt \
     php7.2-tidy
@@ -54,49 +62,23 @@ RUN rm -Rf /etc/php/* && apt install -y \
 RUN rm -rf /etc/php/5.6 /etc/php/7.0 /etc/php/7.1 /etc/php/7.3
 RUN apt clean
 
-# Install Composer
-RUN curl -s http://getcomposer.org/installer | php \
-    && mv composer.phar /usr/local/bin/composer
-
-# Configure Supervisor config
+# Configure Supervisor, Mariadb configs
 ADD startup.sh /opt/bin/startup.sh
 RUN chmod u=rwx /opt/bin/startup.sh
+RUN sed -e '29d' < /etc/mysql/mariadb.conf.d/50-server.cnf >> /etc/mysql/mariadb.conf.d/server.cnf
+RUN rm -rf /etc/mysql/mariadb.conf.d/50-server.cnf
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Configure php.ini
+# Configure Php.ini
 RUN sed -ri "s/post_max_size = 8M/post_max_size = 128M/g" /etc/php/7.2/fpm/php.ini
 RUN sed -ri "s/upload_max_filesize = 2M/upload_max_filesize = 32M/g" /etc/php/7.2/fpm/php.ini
 RUN sed -ri "s/memory_limit = 128M/memory_limit = 256M/g" /etc/php/7.2/fpm/php.ini
 
-# Configure opcache.ini
-RUN echo 'opcache.enable=1 \n\
-opcache.memory_consumption=512 \n\
-opcache.interned_strings_buffer=16 \n\
-opcache.max_accelerated_files=32531 \n\
-opcache.validate_timestamps=0 \n\
-opcache.save_comments=1 \n\
-opcache.fast_shutdown=0' >> /etc/php/7.2/fpm/conf.d/10-opcache.ini
+# Install Composer
+RUN curl -s http://getcomposer.org/installer | php \
+    && mv composer.phar /usr/local/bin/composer
 
-# Configure php-fpm.ini
-# RUN echo '; Custom configs, recommend for over 8G memory\n\
-# pm=static \n\
-# pm.max_children=300 \n\
-# pm.start_servers=20 \n\
-# pm.min_spare_servers=5 \n\
-# pm.max_spare_servers=30 \n\
-# pm.max_requests=10240 \n\
-# request_terminate_timeout=30' >> /etc/php/7.2/fpm/php-fpm.conf
-
-# Configure php-fpm.ini
-RUN echo '; Custom configs, recommend for under 8G memory \n\
-pm=dynamic \n\
-pm.max_children=50 \n\
-pm.start_servers=20 \n\
-pm.min_spare_servers=10 \n\
-pm.max_spare_servers=30 \n\
-pm.max_requests=10240 \n\
-request_terminate_timeout=30' >> /etc/php/7.2/fpm/php-fpm.conf
-
-EXPOSE 80 443
 WORKDIR /www
+
+EXPOSE 80 443 3306 6379 9001
 ENTRYPOINT ["/opt/bin/startup.sh"]
