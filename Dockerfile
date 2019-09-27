@@ -67,6 +67,7 @@ RUN chmod u=rwx /opt/bin/startup.sh
 RUN sed -e '29d' < /etc/mysql/mariadb.conf.d/50-server.cnf >> /etc/mysql/mariadb.conf.d/server.cnf
 RUN rm -rf /etc/mysql/mariadb.conf.d/50-server.cnf
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY default.example.conf /etc/nginx/sites-available/default
 
 # Configure Php.ini
 RUN sed -ri "s/post_max_size = 8M/post_max_size = 128M/g" /etc/php/7.2/fpm/php.ini
