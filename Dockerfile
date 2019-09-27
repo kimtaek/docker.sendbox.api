@@ -48,7 +48,6 @@ RUN rm -Rf /etc/php/* && apt install -y \
     php7.2-curl \
     php7.2-mysql \
     php7.2-imap \
-    php7.2-mcrypt \
     php7.2-tidy
 
 RUN rm -rf /etc/php/5.6 /etc/php/7.0 /etc/php/7.1 /etc/php/7.3
