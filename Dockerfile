@@ -61,6 +61,7 @@ RUN curl -s http://getcomposer.org/installer | php \
 ADD startup.sh /opt/bin/startup.sh
 RUN chmod u=rwx /opt/bin/startup.sh
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY default.example.conf /etc/nginx/sites-available/default
 
 # Configure php.ini
 RUN sed -ri "s/post_max_size = 8M/post_max_size = 128M/g" /etc/php/7.2/fpm/php.ini
