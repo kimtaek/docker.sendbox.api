@@ -56,6 +56,7 @@ RUN rm -Rf /etc/php/* && apt install -y \
     php7.2-curl \
     php7.2-mysql \
     php7.2-xdebug \
+    php7.2-redis \
     php7.2-imap \
     php7.2-tidy
 
@@ -74,6 +75,9 @@ COPY default.example.conf /etc/nginx/sites-available/default
 RUN sed -ri "s/post_max_size = 8M/post_max_size = 128M/g" /etc/php/7.2/fpm/php.ini
 RUN sed -ri "s/upload_max_filesize = 2M/upload_max_filesize = 32M/g" /etc/php/7.2/fpm/php.ini
 RUN sed -ri "s/memory_limit = 128M/memory_limit = 256M/g" /etc/php/7.2/fpm/php.ini
+
+# Configure redis.conf
+RUN sed -ri "s/protected-mode yes/protected-mode no/g" /etc/redis/redis.conf
 
 # Install Composer
 RUN curl -s http://getcomposer.org/installer | php \
