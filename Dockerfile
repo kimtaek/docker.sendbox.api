@@ -76,9 +76,6 @@ RUN sed -ri "s/post_max_size = 8M/post_max_size = 128M/g" /etc/php/7.2/fpm/php.i
 RUN sed -ri "s/upload_max_filesize = 2M/upload_max_filesize = 32M/g" /etc/php/7.2/fpm/php.ini
 RUN sed -ri "s/memory_limit = 128M/memory_limit = 256M/g" /etc/php/7.2/fpm/php.ini
 
-# Configure redis.conf
-RUN sed -ri "s/protected-mode yes/protected-mode no/g" /etc/redis/redis.conf
-
 # Install Composer
 RUN curl -s http://getcomposer.org/installer | php \
     && mv composer.phar /usr/local/bin/composer
