@@ -44,9 +44,11 @@ RUN rm -Rf /etc/php/* && apt install -y \
     php7.2-zip \
     php7.2-apcu \
     php7.2-json \
+    php7.2-intl \
     php7.2-gd \
     php7.2-curl \
     php7.2-mysql \
+    php7.2-redis \
     php7.2-imap \
     php7.2-tidy
 
